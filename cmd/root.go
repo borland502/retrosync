@@ -28,16 +28,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 // Root is the main retrosync command
 var RootCmd = &cobra.Command{
 	Use:   "retrosync",
 	Short: "Sync retropie directories to a remote resource",
 	Long:  `RetroSync is intended to backup the RetroPie menus, config, bios, and rom files to a remote resource`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
 }
 
 // Execute adds all child commands to the root command sets flags appropriately.
@@ -51,29 +46,25 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports Persistent Flags, which, if defined here,
-	// will be global for your application.
-
-	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.retrosync.yaml)")
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" { // enable ability to specify config file via flag
-		viper.SetConfigFile(cfgFile)
-	}
 
-	viper.SetConfigName(".retrosync") // name of config file (without extension)
-	viper.AddConfigPath("$HOME")      // adding home directory as first search path
-	viper.AutomaticEnv()              // read in environment variables that match
+	viper.SetConfigName("retrosynccfg")     // name of config file (without extension)
+	viper.AddConfigPath("$HOME/.retrosync") // adding home directory as first search path
+	viper.AutomaticEnv()                    // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	err := viper.ReadInConfig()
+	if err != nil {
+		//defaults
+		viper.SetDefault("host", "retropie")
+		viper.SetDefault("username", "pi")
+		viper.SetDefault("password", "raspberry")
+		viper.SetDefault("sync_paths", []map[string]string{
+			{"home": "/home/pie/RetroPie"},
+			{"configs": "/opt/retropie/configs"},
+		})
 	}
 }

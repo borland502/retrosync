@@ -1,0 +1,6 @@
+host: retropie
+username: pi
+password: raspberry
+sync_paths:
+        - home: /home/pie/RetroPie          
+        - configs: /opt/retropie/configs
